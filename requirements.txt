@@ -1,0 +1,7 @@
+langgraph
+langchain
+langsmith
+qdrant-client
+streamlit
+python-dotenv
+langchain-openai
