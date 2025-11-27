@@ -3,7 +3,9 @@
 from langchain.tools import tool
 from langchain.chat_models import init_chat_model
 from dotenv import load_dotenv
+import requests
 load_dotenv()
+import os
 
 model = init_chat_model(
     "gpt-4.1-mini",
@@ -44,9 +46,87 @@ def divide(a: int, b: int) -> float:
     """
     return a / b
 
+@tool
+def get_weather(city: str) -> str:
+    """Get the current weather for a given city."""
+    API_KEY = os.getenv("OPENWEATHER_API_KEY")
+    if not API_KEY:
+        return (
+            "OPENWEATHER_API_KEY is not set. Please set it in your environment "
+            "or in a .env file (OPENWEATHER_API_KEY=your_key)."
+        )
 
+    try:
+        geo_url = (
+            f"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={API_KEY}"
+        )
+        geo_resp = requests.get(geo_url, timeout=10)
+    except Exception as e:
+        return f"Network error while calling geocoding API: {e}"
+
+    if geo_resp.status_code != 200:
+        # Try to show useful error message returned by API
+        try:
+            body = geo_resp.json()
+        except Exception:
+            body = geo_resp.text
+        return f"Geocoding API error {geo_resp.status_code}: {body}"
+
+    try:
+        geo = geo_resp.json()
+    except Exception as e:
+        return f"Invalid JSON from geocoding API: {e}"
+
+    if not geo:
+        return f"Could not find location for city: {city}"
+
+    if isinstance(geo, dict):
+        return f"Error in geocoding: {geo.get('message', 'Unknown error')}"
+
+    lat = geo[0].get("lat")
+    lon = geo[0].get("lon")
+    if lat is None or lon is None:
+        return f"Geocoding response missing coordinates: {geo[0]}"
+
+    try:
+        weather_url = (
+            f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
+        )
+        weather_resp = requests.get(weather_url, timeout=10)
+    except Exception as e:
+        return f"Network error while calling weather API: {e}"
+
+    if weather_resp.status_code != 200:
+        try:
+            body = weather_resp.json()
+        except Exception:
+            body = weather_resp.text
+        return f"Weather API error {weather_resp.status_code}: {body}"
+
+    try:
+        weather = weather_resp.json()
+    except Exception as e:
+        return f"Invalid JSON from weather API: {e}"
+
+    # Safely extract fields
+    try:
+        description = weather["weather"][0]["description"]
+        temperature = weather["main"]["temp"]
+        humidity = weather["main"]["humidity"]
+        wind_speed = weather.get("wind", {}).get("speed", "N/A")
+    except (KeyError, TypeError) as e:
+        return f"Unexpected weather data format: {e} -- {weather}"
+
+    weather_report = (
+        f"Current weather in {city}:\n"
+        f"Description: {description}\n"
+        f"Temperature: {temperature}°C\n"
+        f"Humidity: {humidity}%\n"
+        f"Wind Speed: {wind_speed} m/s"
+    )
+    return weather_report
 # Augment the LLM with tools
-tools = [add, multiply, divide]
+tools = [add, multiply, divide, get_weather]
 tools_by_name = {tool.name: tool for tool in tools}
 model_with_tools = model.bind_tools(tools)
 
@@ -146,7 +226,7 @@ agent = agent_builder.compile()
 
 # Invoke
 from langchain.messages import HumanMessage
-messages = [HumanMessage(content="Add 3 and 4.")]
+messages = [HumanMessage(content="What is the weather in Paris? Also, what is 12 multiplied by 7, then add 10 and divide by 2?")]
 messages = agent.invoke({"messages": messages})
 for m in messages["messages"]:
     m.pretty_print()
