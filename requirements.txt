@@ -11,3 +11,4 @@ pypdf
 requests
 langchain-qdrant
 langchain-cohere
+streamlit
