@@ -88,13 +88,6 @@ with st.sidebar:
         clear_conversation()
         st.rerun()
 
-    st.divider()
-    st.subheader("Try these:")
-    for suggestion in SUGGESTIONS:
-        if st.button(suggestion, use_container_width=True):
-            st.session_state.pending_message = suggestion
-            st.rerun()
-
 # Display chat history
 for message in st.session_state.messages:
     with st.chat_message(message["role"]):
@@ -126,3 +119,12 @@ if user_message:
 
     # Add response to history
     st.session_state.messages.append({"role": "assistant", "content": response})
+    st.rerun()
+
+# Show suggestions below chat input
+st.caption("Try asking:")
+cols = st.columns(len(SUGGESTIONS))
+for i, suggestion in enumerate(SUGGESTIONS):
+    if cols[i].button(suggestion, key=f"sug_{i}", use_container_width=True):
+        st.session_state.pending_message = suggestion
+        st.rerun()
