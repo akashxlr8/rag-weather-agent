@@ -2,10 +2,14 @@ import os
 from dotenv import load_dotenv
 from agents.rag_agent import build_rag_agent
 from langchain_core.messages import HumanMessage
+from integrations.langsmith import configure_tracing
 
 def main():
     # Load environment variables
     load_dotenv()
+    
+    # Configure LangSmith tracing
+    configure_tracing()
     
     # Check for API keys
     if not os.getenv("OPENAI_API_KEY"):
