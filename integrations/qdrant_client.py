@@ -45,7 +45,7 @@ def upsert_documents(collection_name: str, docs: List[Document]):
     )
     vector_store.add_documents(documents=docs)
 
-def get_retriever(collection_name: str, k: int = 3):
+def get_retriever(collection_name: str, k: int = 3, score_threshold: float = 0.5):
     """
     Returns a LangChain retriever for the Qdrant collection.
     """
@@ -57,4 +57,7 @@ def get_retriever(collection_name: str, k: int = 3):
         collection_name=collection_name,
         embedding=embeddings,
     )
-    return vector_store.as_retriever(search_kwargs={"k": k})
+    return vector_store.as_retriever(
+        search_type="similarity_score_threshold",
+        search_kwargs={"k": k, "score_threshold": score_threshold}
+    )
