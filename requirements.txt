@@ -5,3 +5,9 @@ qdrant-client
 streamlit
 python-dotenv
 langchain-openai
+langchain-community
+langchain-text-splitters
+pypdf
+requests
+langchain-qdrant
+langchain-cohere
