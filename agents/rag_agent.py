@@ -1,11 +1,12 @@
 from typing import Annotated, Literal, TypedDict
-from langchain_core.messages import BaseMessage, HumanMessage, AIMessage
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
 from langgraph.graph import StateGraph, END
 from langgraph.graph.message import add_messages
 from langchain_openai import ChatOpenAI
 from langchain_core.tools import tool
 from tools.weather import get_weather
-from tools.retriever import retrieve_documents
+from tools.advanced_retriever import advanced_retrieve
+from tools.prompts import AGENT_SYSTEM_PROMPT
 
 class AgentState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
@@ -17,13 +18,28 @@ def build_rag_agent():
     # Define tools
     @tool
     def weather_tool(city: str):
-        """Get the weather for a city."""
+        """Get the weather for a city.
+            Arg:
+                city: Name of the city to get the weather for.
+        
+        """
         return get_weather(city)
 
     @tool
     def retriever_tool(query: str):
-        """Retrieve information from documents."""
-        return retrieve_documents(query)
+        """Retrieve information from documents with automatic relevance grading and query rewriting.
+            Arg:
+                query: The user's query to search for. 
+                
+                
+        Always use this tool for document retrieval from the knowledge base.
+        Try to provide relevant query string based on user question rebuilding from the context and previous interactions.
+        
+        Example:
+            if user asks: "Who is Akash and what is his role?"
+            call retriever_tool with query: "Who is Akash? What is his role? What are his responsibilities? Information about Akash."
+        """
+        return advanced_retrieve(query)
 
     tools = [weather_tool, retriever_tool]
     
@@ -33,7 +49,10 @@ def build_rag_agent():
 
     # Define nodes
     def chatbot(state: AgentState):
-        return {"messages": [llm_with_tools.invoke(state["messages"])]}
+        messages = state["messages"]
+    
+        messages = [SystemMessage(content=AGENT_SYSTEM_PROMPT)] + messages
+        return {"messages": [llm_with_tools.invoke(messages)]}
 
     def tools_node(state: AgentState):
         # Simple tool execution node (in a real app, use ToolNode from langgraph.prebuilt)
