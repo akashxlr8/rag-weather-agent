@@ -124,7 +124,10 @@ def grade_documents(state: AdvancedRetrieverState) -> Literal["return_context_re
         [{"role": "user", "content": prompt}]
     )
     
-    score = response["binary_score"].lower()
+    if isinstance(response, dict):
+        score = response.get("binary_score", "no").lower()
+    else:
+        score = response.binary_score.lower()
     
     if score == "yes":
         return "return_context_relevant"
