@@ -44,7 +44,7 @@ def build_rag_agent():
     tools = [weather_tool, retriever_tool]
     
     # Initialize LLM with tools
-    llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0)
+    llm = ChatOpenAI(model="gpt-4.1-mini", temperature=0, max_completion_tokens=2000)
     llm_with_tools = llm.bind_tools(tools)
 
     # Define nodes
