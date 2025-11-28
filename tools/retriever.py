@@ -8,7 +8,8 @@ def retrieve_documents(query: str) -> str:
     """
     Retrieves relevant documents for a given query using Qdrant.
     """
-    retriever = get_retriever(COLLECTION_NAME)
+    # Use a score threshold to filter out irrelevant documents
+    retriever = get_retriever(COLLECTION_NAME, score_threshold=0.5, k=3)
     docs = retriever.invoke(query)
     
     # Concatenate document content
