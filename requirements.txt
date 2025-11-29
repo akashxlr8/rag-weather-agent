@@ -2,13 +2,12 @@ langgraph==1.0.2
 langchain==0.3.27
 langsmith==0.4.8
 qdrant-client
-streamlit==1.49.1
+streamlit
 python-dotenv
-langchain-openai==0.3.17
+langchain-openai
 langchain-community
-langchain-text-splitters==0.3.9
+langchain-text-splitters
 pypdf
 requests
 langchain-qdrant
 langchain-cohere
-streamlit==1.49.1
