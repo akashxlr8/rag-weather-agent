@@ -8,7 +8,7 @@ langchain-openai==0.3.17
 langchain-community
 langchain-text-splitters==0.3.9
 pypdf
-requests==2.31.0
-langchain-qdrant==0.2.0
+requests
+langchain-qdrant
 langchain-cohere
 streamlit==1.49.1
