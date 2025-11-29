@@ -1,5 +1,9 @@
 # RAG Weather Agent (Quick Start)
 
+
+[![Watch the video](https://cdn.loom.com/sessions/thumbnails/78b956d2260941ddae5a01c324773a1e-3d715dee3f6bcb46-full-play.gif)](https://www.loom.com/share/YOUR_VIDEO_ID)
+
+
 A Python agent that answers weather questions and queries PDF documents using Retrieval-Augmented Generation (RAG).
 
 ## Features
