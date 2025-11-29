@@ -1,6 +1,6 @@
-langgraph==1.0.2
-langchain==0.3.27
-langsmith==0.4.8
+langgraph
+langchain
+langsmith
 qdrant-client
 streamlit
 python-dotenv
